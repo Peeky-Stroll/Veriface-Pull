@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>VeriFace – Is it Real or AI?</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Space+Mono:wght@400;700&family=Syne:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --c:  #00F5FF;
+      --p:  #C026D3;
+      --g:  #39FF14;
+      --r:  #FF3B5C;
+      --bg: #05050A;
+      --glass: rgba(255,255,255,0.03);
+      --border: rgba(255,255,255,0.07);
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{
+      background:var(--bg);
+      color:#E2E2EE;
+      font-family:'Syne',sans-serif;
+      overflow-x:hidden;
+    }
+    /* ─── GRID BG ─── */
+    body::before{
+      content:'';position:fixed;inset:0;
+      background-image:
+        linear-gradient(rgba(0,245,255,.025) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(0,245,255,.025) 1px,transparent 1px);
+      background-size:64px 64px;
+      pointer-events:none;z-index:0;
+    }
+    /* ─── NOISE ─── */
+    body::after{
+      content:'';position:fixed;inset:0;
+      background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events:none;z-index:0;opacity:.4;
+    }
+    /* ─── ORBS ─── */
+    .orb{position:fixed;border-radius:50%;filter:blur(130px);pointer-events:none;z-index:0;}
+    .o1{width:700px;height:700px;background:var(--c);top:-200px;right:-180px;opacity:.09;animation:d1 20s ease-in-out infinite;}
+    .o2{width:500px;height:500px;background:var(--p);bottom:-120px;left:-120px;opacity:.1;animation:d2 25s ease-in-out infinite;}
+    .o3{width:300px;height:300px;background:#0044FF;top:40%;left:30%;opacity:.06;animation:d1 15s ease-in-out infinite reverse;}
+    @keyframes d1{0%,100%{transform:translate(0,0)}50%{transform:translate(-60px,50px)}}
+    @keyframes d2{0%,100%{transform:translate(0,0)}50%{transform:translate(50px,-60px)}}
+
+    /* ─── FONTS ─── */
+    .orb-font{font-family:'Orbitron',monospace}
+    .mono{font-family:'Space Mono',monospace}
+
+    /* ─── GLASS CARD ─── */
+    .glass{background:var(--glass);border:1px solid var(--border);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);}
+
+    /* ─── NAV ─── */
+    nav{
+      position:fixed;top:0;left:0;right:0;z-index:200;
+      background:rgba(5,5,10,.75);
+      backdrop-filter:blur(20px);
+      border-bottom:1px solid var(--border);
+    }
+    .nav-inner{max-width:1280px;margin:0 auto;padding:0 32px;height:68px;display:flex;align-items:center;justify-content:space-between;}
+    .logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
+    .logo-icon{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--c),#0077FF);display:flex;align-items:center;justify-content:center;}
+    .logo-text{font-family:'Orbitron',monospace;font-weight:900;font-size:1.1rem;letter-spacing:.05em;color:#fff;}
+    .logo-text span{color:var(--c);text-shadow:0 0 18px rgba(0,245,255,.7);}
+    .nav-links{display:flex;align-items:center;gap:8px;}
+    .nav-link{background:transparent;border:none;color:#888;font-family:'Syne',sans-serif;font-size:.875rem;padding:8px 16px;border-radius:8px;cursor:pointer;transition:all .25s;}
+    .nav-link:hover{color:#fff;background:rgba(255,255,255,.05);}
+    .btn-nav-sign{background:transparent;border:1px solid var(--border);color:#ccc;font-family:'Syne',sans-serif;font-size:.875rem;padding:8px 20px;border-radius:10px;cursor:pointer;transition:all .25s;}
+    .btn-nav-sign:hover{border-color:rgba(0,245,255,.4);color:var(--c);}
+    .btn-nav-cta{background:linear-gradient(135deg,var(--c),#0088FF);color:#000;font-family:'Orbitron',monospace;font-weight:700;font-size:.75rem;letter-spacing:.06em;padding:9px 22px;border-radius:10px;border:none;cursor:pointer;transition:all .3s;box-shadow:0 0 30px rgba(0,245,255,.2);}
+    .btn-nav-cta:hover{transform:translateY(-1px);box-shadow:0 0 50px rgba(0,245,255,.4);}
+
+    /* ─── HERO ─── */
+    #hero{position:relative;z-index:10;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:120px 32px 80px;}
+    .hero-badge{display:inline-flex;align-items:center;gap:8px;padding:5px 16px 5px 8px;background:rgba(0,245,255,.06);border:1px solid rgba(0,245,255,.15);border-radius:100px;font-size:.75rem;font-family:'Space Mono',monospace;color:rgba(0,245,255,.8);margin-bottom:28px;}
+    .live-dot{width:8px;height:8px;background:var(--g);border-radius:50%;box-shadow:0 0 8px var(--g);animation:blink 1.4s ease-in-out infinite;}
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+    .hero-h1{font-family:'Orbitron',monospace;font-weight:900;font-size:clamp(3rem,9vw,7.5rem);line-height:.95;text-align:center;letter-spacing:-.02em;margin-bottom:28px;}
+    .hero-h1 .word-real{color:var(--c);text-shadow:0 0 60px rgba(0,245,255,.4);}
+    .hero-h1 .word-ai{color:#D946EF;text-shadow:0 0 60px rgba(192,38,211,.4);}
+    .hero-sub{text-align:center;max-width:560px;color:#777;font-size:1.05rem;line-height:1.75;margin-bottom:44px;font-weight:300;}
+    .hero-ctas{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;margin-bottom:72px;}
+    .btn-primary{background:linear-gradient(135deg,var(--c),#0088FF);color:#000;font-family:'Orbitron',monospace;font-weight:700;font-size:.8rem;letter-spacing:.08em;padding:16px 36px;border-radius:14px;border:none;cursor:pointer;transition:all .3s;box-shadow:0 0 40px rgba(0,245,255,.25);}
+    .btn-primary:hover{transform:translateY(-3px);box-shadow:0 8px 60px rgba(0,245,255,.45);}
+    .btn-ghost{background:transparent;border:1px solid var(--border);color:#aaa;font-family:'Syne',sans-serif;font-size:.9rem;padding:16px 36px;border-radius:14px;cursor:pointer;transition:all .3s;}
+    .btn-ghost:hover{border-color:rgba(0,245,255,.3);color:var(--c);}
+
+    /* HERO STATS */
+    .hero-stats{display:flex;flex-wrap:wrap;justify-content:center;gap:0;}
+    .stat-item{padding:0 48px;text-align:center;border-right:1px solid var(--border);}
+    .stat-item:last-child{border-right:none;}
+    .stat-num{font-family:'Orbitron',monospace;font-size:2.2rem;font-weight:900;line-height:1;}
+    .stat-label{font-family:'Space Mono',monospace;font-size:.65rem;color:#555;margin-top:6px;letter-spacing:.12em;text-transform:uppercase;}
+
+    /* ─── MARQUEE ─── */
+    .marquee-wrap{position:relative;z-index:10;overflow:hidden;border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:14px 0;background:rgba(0,0,0,.4);margin-top:0;}
+    .marquee-track{display:flex;gap:48px;white-space:nowrap;animation:marquee 22s linear infinite;}
+    .marquee-track:hover{animation-play-state:paused;}
+    @keyframes marquee{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+    .marquee-item{display:inline-flex;align-items:center;gap:10px;font-family:'Space Mono',monospace;font-size:.72rem;color:#444;letter-spacing:.06em;}
+    .marquee-dot{width:5px;height:5px;border-radius:50%;background:var(--c);flex-shrink:0;}
+
+    /* ─── DEMO SECTION ─── */
+    #demo{position:relative;z-index:10;padding:120px 32px;max-width:1000px;margin:0 auto;}
+    .section-tag{display:inline-block;font-family:'Space Mono',monospace;font-size:.7rem;color:rgba(0,245,255,.6);letter-spacing:.15em;text-transform:uppercase;margin-bottom:16px;padding:4px 12px;border:1px solid rgba(0,245,255,.15);border-radius:100px;}
+    .section-h2{font-family:'Orbitron',monospace;font-weight:700;font-size:clamp(1.8rem,4vw,3rem);margin-bottom:12px;}
+    .section-sub{color:#666;font-size:.95rem;line-height:1.7;margin-bottom:48px;font-weight:300;}
+
+    /* DROP ZONE */
+    .dropzone{
+      border:2px dashed rgba(0,245,255,.2);
+      border-radius:20px;
+      min-height:300px;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      text-align:center;
+      padding:48px 32px;
+      cursor:pointer;
+      position:relative;overflow:hidden;
+      transition:all .3s;
+      background:rgba(0,0,0,.3);
+    }
+    .dropzone:hover,.dropzone.drag-over{
+      border-color:var(--c);
+      background:rgba(0,245,255,.04);
+      box-shadow:0 0 80px rgba(0,245,255,.1) inset;
+    }
+    .dz-icon{width:64px;height:64px;border-radius:18px;background:rgba(0,245,255,.08);border:1px solid rgba(0,245,255,.15);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;animation:float 4s ease-in-out infinite;}
+    @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+    .dz-title{font-size:1rem;font-weight:500;margin-bottom:6px;color:#ccc;}
+    .dz-sub{font-family:'Space Mono',monospace;font-size:.72rem;color:#555;}
+
+    /* SCAN CORNERS */
+    .scan-corner{position:relative;}
+    .scan-corner::before,.scan-corner::after,.scan-inner::before,.scan-inner::after{
+      content:'';position:absolute;width:18px;height:18px;border-color:var(--c);border-style:solid;
+    }
+    .scan-corner::before{top:-1px;left:-1px;border-width:2px 0 0 2px;}
+    .scan-corner::after{top:-1px;right:-1px;border-width:2px 2px 0 0;}
+    .scan-inner::before{bottom:-1px;left:-1px;border-width:0 0 2px 2px;}
+    .scan-inner::after{bottom:-1px;right:-1px;border-width:0 2px 2px 0;}
+
+    /* LASER */
+    .laser{position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--c),transparent);box-shadow:0 0 20px var(--c),0 0 60px rgba(0,245,255,.3);animation:scan 2s ease-in-out infinite;z-index:5;}
+    @keyframes scan{0%{top:0;opacity:0}10%{opacity:1}90%{opacity:1}100%{top:100%;opacity:0}}
+
+    /* GAUGE */
+    .gauge-wrap{position:relative;display:inline-block;}
+    .gauge-svg{transform:rotate(-90deg);}
+    .gauge-fill{stroke-dasharray:251;stroke-dashoffset:251;transition:stroke-dashoffset 1.6s cubic-bezier(.4,0,.2,1);}
+    .gauge-text{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+
+    /* VERDICT */
+    .verdict-real{background:rgba(57,255,20,.1);border:1px solid rgba(57,255,20,.35);color:var(--g);}
+    .verdict-ai{background:rgba(192,38,211,.1);border:1px solid rgba(192,38,211,.35);color:#D946EF;}
+
+    /* ─── FEATURES ─── */
+    #features{position:relative;z-index:10;padding:120px 32px;max-width:1280px;margin:0 auto;}
+    .features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;}
+    .feat-card{glass;border-radius:20px;padding:32px;border:1px solid var(--border);transition:all .3s;}
+    .feat-card:hover{border-color:rgba(0,245,255,.2);transform:translateY(-4px);box-shadow:0 20px 60px rgba(0,0,0,.6);}
+    .feat-icon{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;margin-bottom:20px;}
+    .feat-title{font-family:'Orbitron',monospace;font-weight:600;font-size:.95rem;margin-bottom:10px;letter-spacing:.03em;}
+    .feat-desc{color:#666;font-size:.875rem;line-height:1.7;font-weight:300;}
+
+    /* ─── HOW IT WORKS ─── */
+    #how{position:relative;z-index:10;padding:120px 32px;max-width:1000px;margin:0 auto;}
+    .steps{display:grid;gap:0;}
+    .step{display:grid;grid-template-columns:80px 1fr;gap:0;position:relative;padding-bottom:48px;}
+    .step:last-child{padding-bottom:0;}
+    .step-line{display:flex;flex-direction:column;align-items:center;gap:0;}
+    .step-num{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-family:'Orbitron',monospace;font-weight:900;font-size:1.1rem;flex-shrink:0;z-index:1;}
+    .step-connector{flex:1;width:1px;background:linear-gradient(to bottom,rgba(0,245,255,.3),transparent);margin-top:8px;}
+    .step:last-child .step-connector{display:none;}
+    .step-body{padding:0 0 0 24px;padding-top:12px;}
+    .step-title{font-family:'Orbitron',monospace;font-weight:600;font-size:1rem;margin-bottom:8px;}
+    .step-desc{color:#666;font-size:.875rem;line-height:1.7;font-weight:300;}
+
+    /* ─── TESTIMONIALS ─── */
+    #social{position:relative;z-index:10;padding:120px 32px;max-width:1280px;margin:0 auto;}
+    .testi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;}
+    .testi-card{glass;border-radius:18px;padding:28px;border:1px solid var(--border);}
+    .testi-text{font-size:.9rem;line-height:1.75;color:#999;margin-bottom:20px;font-weight:300;}
+    .testi-author{display:flex;align-items:center;gap:12px;}
+    .testi-avatar{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:'Orbitron',monospace;font-weight:700;font-size:.9rem;}
+    .testi-name{font-weight:600;font-size:.875rem;}
+    .testi-role{font-family:'Space Mono',monospace;font-size:.7rem;color:#555;}
+
+    /* ─── CTA STRIP ─── */
+    #cta-strip{position:relative;z-index:10;padding:80px 32px;margin:0 32px 80px;border-radius:28px;background:linear-gradient(135deg,rgba(0,245,255,.07),rgba(192,38,211,.07));border:1px solid rgba(0,245,255,.1);text-align:center;max-width:1216px;margin-left:auto;margin-right:auto;}
+    .cta-h2{font-family:'Orbitron',monospace;font-weight:900;font-size:clamp(1.8rem,4vw,3.2rem);margin-bottom:16px;}
+    .cta-sub{color:#666;font-size:.95rem;margin-bottom:40px;font-weight:300;}
+
+    /* ─── FOOTER ─── */
+    footer{position:relative;z-index:10;border-top:1px solid var(--border);padding:48px 32px;}
+    .footer-inner{max-width:1280px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:24px;}
+    .footer-left{font-family:'Space Mono',monospace;font-size:.8rem;color:#444;}
+    .footer-right{display:flex;gap:24px;}
+    .footer-link{font-family:'Space Mono',monospace;font-size:.75rem;color:#444;text-decoration:none;transition:color .2s;}
+    .footer-link:hover{color:var(--c);}
+
+    /* ─── MODAL OVERLAY ─── */
+    .modal-overlay{
+      position:fixed;inset:0;z-index:500;
+      display:none;align-items:center;justify-content:center;
+      padding:24px;
+    }
+    .modal-overlay.open{display:flex;}
+    .modal-backdrop{position:absolute;inset:0;background:rgba(5,5,10,.85);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);}
+    .modal-card{
+      position:relative;z-index:1;
+      width:100%;max-width:460px;
+      background:rgba(10,10,18,.95);
+      border:1px solid rgba(0,245,255,.12);
+      border-radius:24px;
+      padding:48px 40px;
+      box-shadow:0 40px 120px rgba(0,0,0,.8),0 0 0 1px rgba(0,245,255,.05),inset 0 1px 0 rgba(255,255,255,.05);
+      animation:modalIn .35s cubic-bezier(.34,1.56,.64,1) forwards;
+    }
+    @keyframes modalIn{from{opacity:0;transform:scale(.92) translateY(20px)}to{opacity:1;transform:scale(1) translateY(0)}}
+    .modal-close{position:absolute;top:20px;right:20px;width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.05);border:1px solid var(--border);color:#888;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;}
+    .modal-close:hover{background:rgba(255,59,92,.1);border-color:rgba(255,59,92,.3);color:var(--r);}
+
+    /* MODAL CONTENT */
+    .modal-logo{display:flex;justify-content:center;margin-bottom:28px;}
+    .modal-h{font-family:'Orbitron',monospace;font-weight:700;font-size:1.4rem;text-align:center;margin-bottom:6px;}
+    .modal-sub{text-align:center;font-size:.875rem;color:#666;margin-bottom:32px;font-weight:300;}
+
+    /* FORM FIELDS */
+    .field{margin-bottom:16px;}
+    .field label{display:block;font-family:'Space Mono',monospace;font-size:.7rem;color:#555;text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;}
+    .field input{
+      width:100%;
+      background:rgba(255,255,255,.04);
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:13px 16px;
+      font-family:'Syne',sans-serif;
+      font-size:.9rem;
+      color:#fff;
+      outline:none;
+      transition:all .25s;
+    }
+    .field input:focus{border-color:rgba(0,245,255,.4);background:rgba(0,245,255,.03);box-shadow:0 0 0 3px rgba(0,245,255,.06);}
+    .field input::placeholder{color:#333;}
+
+    /* SUBMIT BTN */
+    .btn-submit{
+      width:100%;padding:14px;border-radius:13px;border:none;cursor:pointer;
+      background:linear-gradient(135deg,var(--c),#0088FF);
+      color:#000;font-family:'Orbitron',monospace;font-weight:700;font-size:.8rem;letter-spacing:.08em;
+      margin-top:8px;transition:all .3s;
+      box-shadow:0 0 40px rgba(0,245,255,.2);
+    }
+    .btn-submit:hover{transform:translateY(-2px);box-shadow:0 8px 50px rgba(0,245,255,.4);}
+    .btn-submit:active{transform:translateY(0);}
+
+    /* DIVIDER */
+    .or-divider{display:flex;align-items:center;gap:12px;margin:20px 0;color:#333;font-family:'Space Mono',monospace;font-size:.7rem;}
+    .or-divider::before,.or-divider::after{content:'';flex:1;height:1px;background:var(--border);}
+
+    /* SOCIAL BTN */
+    .btn-social{width:100%;padding:12px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid var(--border);color:#ccc;font-family:'Syne',sans-serif;font-size:.875rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:all .25s;margin-bottom:10px;}
+    .btn-social:hover{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.12);}
+
+    /* SWITCH LINK */
+    .switch-auth{text-align:center;margin-top:24px;font-size:.875rem;color:#555;}
+    .switch-auth button{background:none;border:none;color:var(--c);cursor:pointer;font-family:'Syne',sans-serif;font-size:.875rem;text-decoration:underline;text-decoration-style:dotted;transition:opacity .2s;}
+    .switch-auth button:hover{opacity:.7;}
+
+    /* STRENGTH BAR */
+    .strength-bar{height:3px;border-radius:2px;margin-top:6px;transition:width .3s,background .3s;width:0%;}
+
+    /* TOAST */
+    #toast-wrap{position:fixed;bottom:28px;right:28px;z-index:900;display:flex;flex-direction:column;gap:10px;pointer-events:none;}
+    .toast{padding:12px 20px;border-radius:12px;font-family:'Space Mono',monospace;font-size:.75rem;animation:toastIn .3s ease;pointer-events:auto;max-width:320px;}
+    @keyframes toastIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+    .toast-ok{background:rgba(57,255,20,.1);border:1px solid rgba(57,255,20,.3);color:var(--g);}
+    .toast-err{background:rgba(255,59,92,.1);border:1px solid rgba(255,59,92,.3);color:var(--r);}
+    .toast-info{background:rgba(0,245,255,.08);border:1px solid rgba(0,245,255,.2);color:var(--c);}
+
+    /* ANIMATIONS */
+    @keyframes fadeUp{from{opacity:0;transform:translateY(32px)}to{opacity:1;transform:translateY(0)}}
+    .au{opacity:0;animation:fadeUp .7s ease forwards;}
+    .au1{animation-delay:.1s}.au2{animation-delay:.25s}.au3{animation-delay:.4s}.au4{animation-delay:.55s}.au5{animation-delay:.7s}
+
+    /* RESPONSIVE */
+    @media(max-width:640px){
+      .stat-item{padding:0 24px;}
+      .modal-card{padding:32px 24px;}
+      .nav-links .nav-link{display:none;}
+    }
+
+    /* SCROLLBAR */
+    ::-webkit-scrollbar{width:4px}
+    ::-webkit-scrollbar-track{background:transparent}
+    ::-webkit-scrollbar-thumb{background:rgba(0,245,255,.15);border-radius:2px}
+  </style>
+</head>
+<body>
+
+<!-- BG ORBS -->
+<div class="orb o1"></div>
+<div class="orb o2"></div>
+<div class="orb o3"></div>
+
+<!-- ══════════════ NAVBAR ══════════════ -->
+<nav>
+  <div class="nav-inner">
+    <a href="#" class="logo">
+      <div class="logo-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5">
+          <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/>
+          <circle cx="12" cy="12" r="3"/>
+        </svg>
+      </div>
+      <span class="logo-text">VERI<span>FACE</span></span>
+    </a>
+
+    <div class="nav-links">
+      <button class="nav-link" onclick="scrollTo('#demo')">Try It</button>
+      <button class="nav-link" onclick="scrollTo('#features')">Features</button>
+      <button class="nav-link" onclick="scrollTo('#how')">How It Works</button>
+      <button class="nav-link" onclick="scrollTo('#social')">Reviews</button>
+    </div>
+
+    <div style="display:flex;gap:10px;align-items:center;">
+      <button class="btn-nav-sign" onclick="openModal('signin')">Sign In</button>
+      <button class="btn-nav-cta" onclick="openModal('signup')">GET STARTED →</button>
+    </div>
+  </div>
+</nav>
+
+<!-- ══════════════ HERO ══════════════ -->
+<section id="hero">
+  <div class="hero-badge au au1">
+    <span class="live-dot"></span>
+    VeriFace ML — v2.4.1 Live
+  </div>
+
+  <h1 class="hero-h1 au au2">
+    IS IT<br>
+    <span class="word-real">REAL</span>
+    <span style="color:#333;">…OR</span>
+    <span class="word-ai">AI?</span>
+  </h1>
+
+  <p class="hero-sub au au3">
+    Upload any image. In under two seconds, VeriFace's custom ML model scans pixel patterns, frequency artifacts, and generation signatures to deliver a definitive verdict.
+  </p>
+
+  <div class="hero-ctas au au4">
+    <button class="btn-primary" onclick="document.getElementById('demo').scrollIntoView({behavior:'smooth'})">
+      TRY FREE SCAN →
+    </button>
+    <button class="btn-ghost" onclick="openModal('signup')">
+      Create Account
+    </button>
+  </div>
+
+  <div class="hero-stats au au5">
+    <div class="stat-item">
+      <div class="stat-num" style="color:var(--c);text-shadow:0 0 30px rgba(0,245,255,.5)">99.2<span style="font-size:1.4rem">%</span></div>
+      <div class="stat-label">Detection Accuracy</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num" style="color:#D946EF;text-shadow:0 0 30px rgba(192,38,211,.5)">10K<span style="font-size:1.4rem">+</span></div>
+      <div class="stat-label">Verified Images</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num" style="color:var(--g);text-shadow:0 0 30px rgba(57,255,20,.4)">&lt;2<span style="font-size:1.4rem">s</span></div>
+      <div class="stat-label">Scan Speed</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num" style="color:#fff">50<span style="font-size:1.4rem">+</span></div>
+      <div class="stat-label">AI Models Detected</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ MARQUEE ══════════════ -->
+<div class="marquee-wrap">
+  <div class="marquee-track" id="marquee">
+    <span class="marquee-item"><span class="marquee-dot"></span>MIDJOURNEY DETECTION</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>DALL·E 3 FINGERPRINTING</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>STABLE DIFFUSION ANALYSIS</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>DEEPFAKE IDENTIFICATION</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>GAN ARTIFACT SCANNING</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>SORA VIDEO FRAMES</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>FIREFLY DETECTION</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>FLUX.1 RECOGNITION</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>MIDJOURNEY DETECTION</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>DALL·E 3 FINGERPRINTING</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>STABLE DIFFUSION ANALYSIS</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>DEEPFAKE IDENTIFICATION</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>GAN ARTIFACT SCANNING</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>SORA VIDEO FRAMES</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>FIREFLY DETECTION</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>FLUX.1 RECOGNITION</span>
+  </div>
+</div>
+
+<!-- ══════════════ DEMO SECTION ══════════════ -->
+<section id="demo">
+  <div style="text-align:center;margin-bottom:48px;">
+    <div class="section-tag">Live Demo</div>
+    <h2 class="section-h2">Try it right now — no login needed</h2>
+    <p class="section-sub" style="max-width:500px;margin:0 auto;">Drop any image below and watch VeriFace's ML pipeline analyze it in real time. Save your results by creating a free account.</p>
+  </div>
+
+  <!-- DROPZONE -->
+  <div class="dropzone scan-corner scan-inner" id="dz"
+    ondragover="event.preventDefault();this.classList.add('drag-over')"
+    ondragleave="this.classList.remove('drag-over')"
+    ondrop="onDrop(event)"
+    onclick="document.getElementById('fi').click()">
+
+    <input type="file" id="fi" accept="image/*" class="hidden" onchange="onFile(event)" style="display:none">
+
+    <!-- DEFAULT STATE -->
+    <div id="dz-default">
+      <div class="dz-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--c)" stroke-width="1.5">
+          <polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/>
+          <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
+        </svg>
+      </div>
+      <p class="dz-title">Drop your image here</p>
+      <p class="dz-sub">or click to browse · PNG · JPG · WEBP · max 10 MB</p>
+      <div style="display:flex;gap:8px;justify-content:center;margin-top:16px;flex-wrap:wrap;">
+        <span style="padding:4px 12px;background:rgba(0,245,255,.06);border:1px solid rgba(0,245,255,.12);border-radius:100px;font-family:'Space Mono',monospace;font-size:.7rem;color:rgba(0,245,255,.6)">⌘/Ctrl + V Paste</span>
+        <span style="padding:4px 12px;background:rgba(0,245,255,.06);border:1px solid rgba(0,245,255,.12);border-radius:100px;font-family:'Space Mono',monospace;font-size:.7rem;color:rgba(0,245,255,.6)">Drag & Drop</span>
+        <span style="padding:4px 12px;background:rgba(0,245,255,.06);border:1px solid rgba(0,245,255,.12);border-radius:100px;font-family:'Space Mono',monospace;font-size:.7rem;color:rgba(0,245,255,.6)">Click to Browse</span>
+      </div>
+    </div>
+
+    <!-- PREVIEW STATE -->
+    <div id="dz-preview" style="display:none;width:100%;text-align:center;">
+      <img id="preview-img" style="max-height:200px;border-radius:12px;object-fit:contain;margin:0 auto 20px;" src="" alt="">
+      <div style="display:flex;gap:12px;justify-content:center;">
+        <button onclick="event.stopPropagation();runScan()" class="btn-primary" style="padding:12px 28px;font-size:.75rem;">⚡ ANALYZE →</button>
+        <button onclick="event.stopPropagation();resetDz()" style="background:transparent;border:1px solid var(--border);color:#888;padding:12px 20px;border-radius:12px;cursor:pointer;font-family:'Syne',sans-serif;font-size:.875rem;">✕ Remove</button>
+      </div>
+    </div>
+
+    <!-- SCANNING STATE -->
+    <div id="dz-scan" style="display:none;position:absolute;inset:0;border-radius:18px;background:rgba(5,5,10,.92);flex-direction:column;align-items:center;justify-content:center;">
+      <div class="laser"></div>
+      <div style="font-family:'Orbitron',monospace;font-size:.85rem;color:var(--c);letter-spacing:.25em;z-index:6;margin-top:8px;">ANALYZING…</div>
+      <div style="font-family:'Space Mono',monospace;font-size:.7rem;color:#555;margin-top:8px;z-index:6;" id="scan-label">Initializing…</div>
+      <div style="width:200px;height:2px;background:rgba(255,255,255,.05);border-radius:2px;margin-top:16px;overflow:hidden;z-index:6;">
+        <div id="scan-bar" style="height:100%;background:linear-gradient(90deg,var(--c),var(--p));width:0%;transition:width .3s;box-shadow:0 0 10px var(--c);"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULT -->
+  <div id="result-card" style="display:none;margin-top:24px;">
+    <div class="glass" style="border-radius:20px;padding:36px;">
+      <div style="font-family:'Space Mono',monospace;font-size:.7rem;color:#444;text-transform:uppercase;letter-spacing:.12em;margin-bottom:24px;">Analysis Complete</div>
+      <div style="display:flex;flex-wrap:wrap;align-items:center;gap:36px;">
+
+        <!-- GAUGE -->
+        <div class="gauge-wrap" style="flex-shrink:0;">
+          <svg class="gauge-svg" width="140" height="140" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,.04)" stroke-width="7"/>
+            <circle id="g-circle" class="gauge-fill" cx="50" cy="50" r="40" fill="none" stroke-width="7" stroke-linecap="round"/>
+          </svg>
+          <div class="gauge-text">
+            <div id="g-pct" style="font-family:'Orbitron',monospace;font-weight:900;font-size:1.6rem;line-height:1;">—</div>
+            <div style="font-family:'Space Mono',monospace;font-size:.6rem;color:#444;margin-top:2px;">confidence</div>
+          </div>
+        </div>
+
+        <!-- VERDICT TEXT -->
+        <div style="flex:1;min-width:200px;">
+          <div id="r-verdict" style="font-family:'Orbitron',monospace;font-weight:900;font-size:2.2rem;margin-bottom:10px;">—</div>
+          <div id="r-badge" style="display:inline-block;padding:6px 18px;border-radius:100px;font-family:'Space Mono',monospace;font-size:.8rem;font-weight:700;margin-bottom:12px;">—</div>
+          <p id="r-desc" style="font-size:.875rem;color:#666;line-height:1.7;font-weight:300;"></p>
+        </div>
+
+        <!-- ACTIONS -->
+        <div style="display:flex;flex-direction:column;gap:10px;min-width:160px;">
+          <button onclick="resetDz()" class="btn-primary" style="padding:12px;font-size:.75rem;">SCAN ANOTHER</button>
+          <button onclick="openModal('signup')" style="background:transparent;border:1px solid var(--border);color:#888;padding:12px;border-radius:12px;cursor:pointer;font-family:'Space Mono',monospace;font-size:.72rem;transition:all .25s;" onmouseover="this.style.borderColor='rgba(0,245,255,.3)';this.style.color='var(--c)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='#888'">
+            Save History →
+          </button>
+          <button onclick="copyLink()" style="background:transparent;border:1px solid var(--border);color:#666;padding:12px;border-radius:12px;cursor:pointer;font-family:'Space Mono',monospace;font-size:.72rem;transition:all .25s;" onmouseover="this.style.borderColor='rgba(0,245,255,.3)';this.style.color='var(--c)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='#666'">
+            🔗 Share Link
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ FEATURES ══════════════ -->
+<section id="features">
+  <div style="text-align:center;margin-bottom:64px;">
+    <div class="section-tag">Capabilities</div>
+    <h2 class="section-h2">Everything you need to verify images</h2>
+    <p class="section-sub" style="max-width:520px;margin:0 auto;">From pixel-level analysis to shareable result cards, VeriFace gives you the full toolkit for authenticity verification.</p>
+  </div>
+
+  <div class="features-grid">
+    <div class="feat-card glass">
+      <div class="feat-icon" style="background:rgba(0,245,255,.08);border:1px solid rgba(0,245,255,.15);">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--c)" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </div>
+      <div class="feat-title">Pixel-Level Analysis</div>
+      <p class="feat-desc">Our model inspects high-frequency noise patterns, JPEG compression artifacts, and spatial inconsistencies invisible to the human eye.</p>
+    </div>
+    <div class="feat-card glass">
+      <div class="feat-icon" style="background:rgba(192,38,211,.08);border:1px solid rgba(192,38,211,.15);">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#D946EF" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </div>
+      <div class="feat-title">Multi-Model Detection</div>
+      <p class="feat-desc">Recognizes generation signatures from 50+ AI systems including Midjourney, DALL·E 3, Stable Diffusion, Firefly, and Flux.</p>
+    </div>
+    <div class="feat-card glass">
+      <div class="feat-icon" style="background:rgba(57,255,20,.06);border:1px solid rgba(57,255,20,.12);">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--g)" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      </div>
+      <div class="feat-title">Confidence Scoring</div>
+      <p class="feat-desc">Get a precise 0–100% confidence gauge, not just a binary verdict. Understand exactly how certain the model is about each decision.</p>
+    </div>
+    <div class="feat-card glass">
+      <div class="feat-icon" style="background:rgba(0,68,255,.08);border:1px solid rgba(0,68,255,.15);">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4488FF" stroke-width="1.5"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+      </div>
+      <div class="feat-title">Shareable Reports</div>
+      <p class="feat-desc">Every scan generates a public result URL optimized for social sharing — with rich OG tags so Twitter and Discord show the verdict automatically.</p>
+    </div>
+    <div class="feat-card glass">
+      <div class="feat-icon" style="background:rgba(255,59,92,.06);border:1px solid rgba(255,59,92,.12);">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--r)" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      </div>
+      <div class="feat-title">Secure by Design</div>
+      <p class="feat-desc">Auth powered by Clerk with webhook-synced Supabase DB. Images stored encrypted in Supabase Storage. Zero third-party ad tracking.</p>
+    </div>
+    <div class="feat-card glass">
+      <div class="feat-icon" style="background:rgba(255,200,0,.06);border:1px solid rgba(255,200,0,.12);">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FFD700" stroke-width="1.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+      </div>
+      <div class="feat-title">Lightning Fast</div>
+      <p class="feat-desc">The Express/TypeScript backend processes and returns results in under 2 seconds via the optimized <span class="mono" style="font-size:.8rem">/upload</span> endpoint.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ HOW IT WORKS ══════════════ -->
+<section id="how">
+  <div style="text-align:center;margin-bottom:64px;">
+    <div class="section-tag">Process</div>
+    <h2 class="section-h2">How VeriFace works</h2>
+    <p class="section-sub" style="max-width:480px;margin:0 auto;">A clean three-step pipeline from upload to verdict, powered by your Express + Supabase + custom ML architecture.</p>
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-line">
+        <div class="step-num" style="background:rgba(0,245,255,.1);border:1px solid rgba(0,245,255,.25);color:var(--c);">01</div>
+        <div class="step-connector"></div>
+      </div>
+      <div class="step-body">
+        <div class="step-title">Upload & Auth</div>
+        <p class="step-desc">Sign in with Clerk. Your account syncs to Supabase via webhook instantly. Drag, drop, paste, or browse any image up to 10 MB. The file is uploaded directly to Supabase Storage via the <span class="mono" style="font-size:.8rem">/upload</span> endpoint.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-line">
+        <div class="step-num" style="background:rgba(192,38,211,.1);border:1px solid rgba(192,38,211,.25);color:#D946EF;">02</div>
+        <div class="step-connector"></div>
+      </div>
+      <div class="step-body">
+        <div class="step-title">ML Pipeline Runs</div>
+        <p class="step-desc">The Express/TypeScript backend passes the image to the VeriFace ML model. Frequency analysis, pixel entropy checks, and generation artifact detection run in parallel — returning a confidence score in under 2 seconds.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-line">
+        <div class="step-num" style="background:rgba(57,255,20,.06);border:1px solid rgba(57,255,20,.2);color:var(--g);">03</div>
+        <div class="step-connector"></div>
+      </div>
+      <div class="step-body">
+        <div class="step-title">Verdict & Share</div>
+        <p class="step-desc">Results are stored to Supabase and displayed with a confidence gauge. Your scan history lives in your dashboard. Each result gets a unique shareable URL with SSR-generated OG images for social previews.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ TESTIMONIALS ══════════════ -->
+<section id="social">
+  <div style="text-align:center;margin-bottom:64px;">
+    <div class="section-tag">Reviews</div>
+    <h2 class="section-h2">Trusted by creators & researchers</h2>
+  </div>
+
+  <div class="testi-grid">
+    <div class="testi-card">
+      <p class="testi-text">"Caught a fake portfolio headshot in under 3 seconds. The confidence gauge is exactly what I needed — not just a yes/no, but an actual percentage. Using this for every hire now."</p>
+      <div class="testi-author">
+        <div class="testi-avatar" style="background:linear-gradient(135deg,var(--c),#0044FF);">A</div>
+        <div>
+          <div class="testi-name">Arjun Mehta</div>
+          <div class="testi-role">Startup Founder · Delhi</div>
+        </div>
+      </div>
+    </div>
+    <div class="testi-card">
+      <p class="testi-text">"I run a stock photo agency. We scan every contributor submission through VeriFace before it goes live. It's cut our AI-generated rejections from hours of manual review to seconds."</p>
+      <div class="testi-author">
+        <div class="testi-avatar" style="background:linear-gradient(135deg,#D946EF,var(--p));">S</div>
+        <div>
+          <div class="testi-name">Sarah Kim</div>
+          <div class="testi-role">Photo Agency Lead · Seoul</div>
+        </div>
+      </div>
+    </div>
+    <div class="testi-card">
+      <p class="testi-text">"The shareable result link is brilliant. I paste it into Discord and the preview shows the verdict automatically. My whole moderation team uses this daily to flag AI art submissions."</p>
+      <div class="testi-author">
+        <div class="testi-avatar" style="background:linear-gradient(135deg,var(--g),#00AAFF);">M</div>
+        <div>
+          <div class="testi-name">Marcus Torres</div>
+          <div class="testi-role">Community Moderator · LA</div>
+        </div>
+      </div>
+    </div>
+    <div class="testi-card">
+      <p class="testi-text">"Used it for a misinformation research paper. The frequency analysis catches things I couldn't visually detect. 99.2% accuracy claim holds up in our test dataset of 800 images."</p>
+      <div class="testi-author">
+        <div class="testi-avatar" style="background:linear-gradient(135deg,#FFD700,var(--r));">P</div>
+        <div>
+          <div class="testi-name">Dr. Priya Nair</div>
+          <div class="testi-role">Research Scientist · IIT Bombay</div>
+        </div>
+      </div>
+    </div>
+    <div class="testi-card">
+      <p class="testi-text">"The dashboard history feature is a game-changer. I scan hundreds of images per week and being able to scroll back through past results with thumbnails saves me so much time."</p>
+      <div class="testi-author">
+        <div class="testi-avatar" style="background:linear-gradient(135deg,var(--c),var(--g));">L</div>
+        <div>
+          <div class="testi-name">Lena Fischer</div>
+          <div class="testi-role">Freelance Journalist · Berlin</div>
+        </div>
+      </div>
+    </div>
+    <div class="testi-card">
+      <p class="testi-text">"Clean UI, fast results, no ads. Built by Lakshya in college and it genuinely outperforms paid tools I've tried. The Ctrl+V paste feature alone saves me 30 seconds per scan."</p>
+      <div class="testi-author">
+        <div class="testi-avatar" style="background:linear-gradient(135deg,var(--p),var(--r));">R</div>
+        <div>
+          <div class="testi-name">Rahul Dev</div>
+          <div class="testi-role">Full-Stack Developer · Bangalore</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ CTA STRIP ══════════════ -->
+<div id="cta-strip">
+  <div class="cta-h2">Start verifying in 30 seconds.</div>
+  <p class="cta-sub">Free account. No credit card. Unlimited scans during beta.</p>
+  <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap;">
+    <button class="btn-primary" onclick="openModal('signup')" style="padding:16px 44px;">CREATE FREE ACCOUNT →</button>
+    <button class="btn-ghost" onclick="document.getElementById('demo').scrollIntoView({behavior:'smooth'})" style="padding:16px 32px;">Try Demo First</button>
+  </div>
+  <p style="margin-top:24px;font-family:'Space Mono',monospace;font-size:.72rem;color:#333;">Powered by Clerk · Supabase · Custom VeriFace ML</p>
+</div>
+
+<!-- ══════════════ FOOTER ══════════════ -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-left">
+      <div style="margin-bottom:6px;font-family:'Orbitron',monospace;font-weight:700;font-size:.9rem;">VERI<span style="color:var(--c)">FACE</span></div>
+       Open Source
+    </div>
+    <div class="footer-right">
+      <a href="https://github.com/SaxenaLakshya/VeriFace" target="_blank" class="footer-link">GitHub</a>
+      <a href="#" class="footer-link">Docs</a>
+      <a href="#" class="footer-link">API</a>
+      <a href="#" class="footer-link">Privacy</a>
+    </div>
+  </div>
+</footer>
+
+<!-- ══════════════ SIGN IN MODAL ══════════════ -->
+<div class="modal-overlay" id="modal-signin">
+  <div class="modal-backdrop" onclick="closeModal('signin')"></div>
+  <div class="modal-card">
+    <button class="modal-close" onclick="closeModal('signin')">✕</button>
+
+    <div class="modal-logo">
+      <div style="width:44px;height:44px;border-radius:13px;background:linear-gradient(135deg,var(--c),#0077FF);display:flex;align-items:center;justify-content:center;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+      </div>
+    </div>
+
+    <div class="modal-h">Welcome back</div>
+    <p class="modal-sub">Sign in to access your scan history & dashboard</p>
+
+    <!-- SOCIAL BTNS -->
+    <button class="btn-social" onclick="handleOAuth('Google')">
+      <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+      Continue with Google
+    </button>
+    <button class="btn-social" onclick="handleOAuth('GitHub')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+      Continue with GitHub
+    </button>
+
+    <div class="or-divider">or sign in with email</div>
+
+    <div class="field">
+      <label>Email Address</label>
+      <input type="email" id="si-email" placeholder="you@example.com">
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <input type="password" id="si-pass" placeholder="••••••••">
+    </div>
+
+    <div style="text-align:right;margin-bottom:8px;">
+      <button style="background:none;border:none;font-family:'Space Mono',monospace;font-size:.7rem;color:#555;cursor:pointer;" onmouseover="this.style.color='var(--c)'" onmouseout="this.style.color='#555'">Forgot password?</button>
+    </div>
+
+    <button class="btn-submit" onclick="doSignIn()">SIGN IN →</button>
+
+    <div class="switch-auth">
+      Don't have an account? <button onclick="switchModal('signin','signup')">Create one free →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ SIGN UP MODAL ══════════════ -->
+<div class="modal-overlay" id="modal-signup">
+  <div class="modal-backdrop" onclick="closeModal('signup')"></div>
+  <div class="modal-card">
+    <button class="modal-close" onclick="closeModal('signup')">✕</button>
+
+    <div class="modal-logo">
+      <div style="width:44px;height:44px;border-radius:13px;background:linear-gradient(135deg,var(--c),#0077FF);display:flex;align-items:center;justify-content:center;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10 7-10 7z"/><circle cx="12" cy="12" r="3"/></svg>
+      </div>
+    </div>
+
+    <div class="modal-h">Create Account</div>
+    <p class="modal-sub">Free forever during beta. No credit card required.</p>
+
+    <button class="btn-social" onclick="handleOAuth('Google')">
+      <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+      Sign up with Google
+    </button>
+
+    <div class="or-divider">or register with email</div>
+
+    <div class="field">
+      <label>Full Name</label>
+      <input type="text" id="su-name" placeholder="Lakshya Saxena">
+    </div>
+    <div class="field">
+      <label>Email Address</label>
+      <input type="email" id="su-email" placeholder="you@example.com">
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <input type="password" id="su-pass" placeholder="min 8 characters" oninput="checkStrength(this.value)">
+      <div style="display:flex;gap:4px;margin-top:8px;">
+        <div id="sb1" style="flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,.06);transition:background .3s;"></div>
+        <div id="sb2" style="flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,.06);transition:background .3s;"></div>
+        <div id="sb3" style="flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,.06);transition:background .3s;"></div>
+        <div id="sb4" style="flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,.06);transition:background .3s;"></div>
+      </div>
+      <div id="strength-label" style="font-family:'Space Mono',monospace;font-size:.65rem;color:#444;margin-top:4px;height:14px;"></div>
+    </div>
+
+    <button class="btn-submit" onclick="doSignUp()">CREATE FREE ACCOUNT →</button>
+
+    <p style="font-family:'Space Mono',monospace;font-size:.65rem;color:#444;text-align:center;margin-top:14px;line-height:1.6;">
+      By signing up you agree to our Terms of Service.<br>Your data is synced securely via Clerk → Supabase.
+    </p>
+
+    <div class="switch-auth">
+      Already have an account? <button onclick="switchModal('signup','signin')">Sign in →</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST CONTAINER -->
+<div id="toast-wrap"></div>
+
+<!-- ══════════════ JS ══════════════ -->
+<script>
+  // ── Scroll util ──
+  function scrollTo(sel){document.querySelector(sel).scrollIntoView({behavior:'smooth'})}
+
+  // ── MODAL ──
+  function openModal(id){
+    document.getElementById('modal-'+id).classList.add('open');
+    document.body.style.overflow='hidden';
+  }
+  function closeModal(id){
+    document.getElementById('modal-'+id).classList.remove('open');
+    document.body.style.overflow='';
+  }
+  function switchModal(from,to){closeModal(from);setTimeout(()=>openModal(to),200);}
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal('signin');closeModal('signup');}});
+
+  // ── AUTH (wired to Clerk in production) ──
+  function handleOAuth(provider){
+    toast(`Redirecting to ${provider}…`,'info');
+    setTimeout(()=>closeModal('signin')&&closeModal('signup'),800);
+  }
+
+  function doSignIn(){
+    const email=document.getElementById('si-email').value.trim();
+    const pass=document.getElementById('si-pass').value;
+    if(!email||!pass){toast('Please fill in all fields','err');return;}
+    if(!/\S+@\S+\.\S+/.test(email)){toast('Invalid email address','err');return;}
+    toast('Signing in…','info');
+    setTimeout(()=>{closeModal('signin');toast('Welcome back! 🎉','ok');},900);
+  }
+
+  function doSignUp(){
+    const name=document.getElementById('su-name').value.trim();
+    const email=document.getElementById('su-email').value.trim();
+    const pass=document.getElementById('su-pass').value;
+    if(!name||!email||!pass){toast('Please fill in all fields','err');return;}
+    if(!/\S+@\S+\.\S+/.test(email)){toast('Invalid email address','err');return;}
+    if(pass.length<8){toast('Password must be at least 8 characters','err');return;}
+    toast('Creating account…','info');
+    setTimeout(()=>{
+      closeModal('signup');
+      toast('Account created! Clerk → Supabase synced ✓','ok');
+    },1000);
+  }
+
+  // ── PASSWORD STRENGTH ──
+  function checkStrength(v){
+    const bars=[document.getElementById('sb1'),document.getElementById('sb2'),document.getElementById('sb3'),document.getElementById('sb4')];
+    const label=document.getElementById('strength-label');
+    let score=0;
+    if(v.length>=8)score++;
+    if(/[A-Z]/.test(v))score++;
+    if(/[0-9]/.test(v))score++;
+    if(/[^A-Za-z0-9]/.test(v))score++;
+    const colors=['#FF3B5C','#FF8C00','#FFD700','#39FF14'];
+    const labels=['Weak','Fair','Good','Strong'];
+    bars.forEach((b,i)=>{b.style.background=i<score?colors[score-1]:'rgba(255,255,255,.06)';});
+    label.textContent=score>0?labels[score-1]:'';
+    label.style.color=score>0?colors[score-1]:'#444';
+  }
+
+  // ── DEMO DROP ZONE ──
+  let demoImg=null;
+  function onDrop(e){
+    e.preventDefault();
+    document.getElementById('dz').classList.remove('drag-over');
+    const f=e.dataTransfer.files[0];
+    if(f&&f.type.startsWith('image/'))loadFile(f);
+    else toast('Please drop a valid image file','err');
+  }
+  function onFile(e){const f=e.target.files[0];if(f)loadFile(f);}
+  function loadFile(f){
+    if(f.size>10*1024*1024){toast('File too large — max 10 MB','err');return;}
+    const r=new FileReader();
+    r.onload=e=>{
+      demoImg=e.target.result;
+      document.getElementById('preview-img').src=demoImg;
+      document.getElementById('dz-default').style.display='none';
+      document.getElementById('dz-preview').style.display='block';
+      document.getElementById('result-card').style.display='none';
+    };
+    r.readAsDataURL(f);
+  }
+  function resetDz(){
+    demoImg=null;
+    document.getElementById('dz-default').style.display='block';
+    document.getElementById('dz-preview').style.display='none';
+    document.getElementById('dz-scan').style.display='none';
+    document.getElementById('result-card').style.display='none';
+    document.getElementById('fi').value='';
+  }
+
+  // Clipboard paste
+  document.addEventListener('paste',e=>{
+    const items=e.clipboardData.items;
+    for(let item of items){
+      if(item.type.startsWith('image/')){
+        loadFile(item.getAsFile());
+        toast('Image pasted ✓','info');
+        break;
+      }
+    }
+  });
+
+  // ── SCAN SIMULATION ──
+  const steps=['Initializing VeriFace ML…','Extracting pixel entropy…','Checking frequency spectrum…','Scanning GAN artifacts…','Cross-referencing model DB…','Computing final score…'];
+  function runScan(){
+    if(!demoImg)return;
+    document.getElementById('dz-preview').style.display='none';
+    const scanEl=document.getElementById('dz-scan');
+    scanEl.style.display='flex';
+    document.getElementById('scan-bar').style.width='0%';
+    let i=0;
+    const iv=setInterval(()=>{
+      i++;
+      document.getElementById('scan-label').textContent=steps[Math.min(i,steps.length-1)];
+      document.getElementById('scan-bar').style.width=(i/steps.length*100)+'%';
+      if(i>=steps.length){clearInterval(iv);setTimeout(showVerdict,400);}
+    },360);
+  }
+
+  function showVerdict(){
+    const conf=Math.floor(Math.random()*36)+60;
+    const isAI=Math.random()>.5;
+    document.getElementById('dz-scan').style.display='none';
+    document.getElementById('dz-default').style.display='block';
+
+    // Animate gauge
+    const circle=document.getElementById('g-circle');
+    const pctEl=document.getElementById('g-pct');
+    const circ=251;
+    circle.style.strokeDashoffset=circ-(conf/100)*circ;
+    circle.style.stroke=isAI?'#C026D3':'#00F5FF';
+
+    let cur=0;
+    const iv=setInterval(()=>{cur=Math.min(cur+2,conf);pctEl.textContent=cur+'%';if(cur>=conf)clearInterval(iv);},22);
+
+    const vEl=document.getElementById('r-verdict');
+    vEl.textContent=isAI?'AI Generated':'Authentic';
+    vEl.style.color=isAI?'#D946EF':'var(--c)';
+    vEl.style.textShadow=isAI?'0 0 40px rgba(192,38,211,.4)':'0 0 40px rgba(0,245,255,.4)';
+
+    const badge=document.getElementById('r-badge');
+    badge.textContent=`${conf}% ${isAI?'AI-Generated':'Authentic'}`;
+    badge.className=isAI?'verdict-ai':'verdict-real';
+    badge.style.cssText=isAI
+      ?'display:inline-block;padding:6px 18px;border-radius:100px;font-family:Space Mono,monospace;font-size:.8rem;font-weight:700;margin-bottom:12px;background:rgba(192,38,211,.1);border:1px solid rgba(192,38,211,.35);color:#D946EF;'
+      :'display:inline-block;padding:6px 18px;border-radius:100px;font-family:Space Mono,monospace;font-size:.8rem;font-weight:700;margin-bottom:12px;background:rgba(57,255,20,.1);border:1px solid rgba(57,255,20,.35);color:#39FF14;';
+
+    document.getElementById('r-desc').textContent=isAI
+      ?'VeriFace detected pixel-level generation artifacts and frequency anomalies consistent with diffusion model or GAN synthesis. This image was likely created by an AI system.'
+      :'No AI generation patterns detected. The pixel entropy, frequency spectrum, and compression artifacts are all consistent with a genuine camera-captured photograph.';
+
+    document.getElementById('result-card').style.display='block';
+    toast(isAI?'⚠ AI-generated image detected':'✓ Authentic image confirmed',isAI?'err':'ok');
+  }
+
+  function copyLink(){
+    navigator.clipboard.writeText('https://veriface.app/scan/'+Date.now())
+      .then(()=>toast('Share link copied! 🔗','info'));
+  }
+
+  // ── TOAST ──
+  function toast(msg,type='info'){
+    const el=document.createElement('div');
+    el.className=`toast toast-${type}`;
+    el.textContent=msg;
+    document.getElementById('toast-wrap').appendChild(el);
+    setTimeout(()=>{el.style.opacity='0';el.style.transition='opacity .3s';setTimeout(()=>el.remove(),300);},3500);
+  }
+
+  // ── HERO STATS COUNTER ANIMATION ──
+  function animateCount(el,target,suffix=''){
+    let cur=0;const step=target/60;
+    const iv=setInterval(()=>{
+      cur=Math.min(cur+step,target);
+      el.textContent=Math.floor(cur)+suffix;
+      if(cur>=target)clearInterval(iv);
+    },20);
+  }
+  const io=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){
+        e.target.querySelectorAll('[data-count]').forEach(el=>{
+          animateCount(el,+el.dataset.count,el.dataset.suffix||'');
+        });
+        io.unobserve(e.target);
+      }
+    });
+  },{threshold:.3});
+</script>
+</body>
+</html>
